@@ -56,7 +56,10 @@ the workflow) and the signed app lands in TestFlight.
 
 ## Notes
 
-- Repo is **private**. GitHub free plans include monthly Actions minutes;
-  macOS minutes bill at 10x, and a build here takes ~2–5 min.
+- Repo is currently **public** so GitHub Actions runners will start. On this
+  account, private-repo jobs currently get no runner (GitHub's Actions
+  billing/spending-limit state — see Settings → Billing & plans). Once that's
+  in good standing, private builds work identically; macOS minutes bill at
+  10x on private repos, and a build here takes ~2–5 min.
 - Set secrets under Settings → Secrets and variables → Actions. Never commit
   keys, certificates, or the `.p8` file.
