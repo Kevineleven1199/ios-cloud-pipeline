@@ -1,0 +1,41 @@
+name: Build (headless proof)
+
+# Proves the cloud pipeline end-to-end: a GitHub-hosted macOS runner checks
+# out this repo and compiles the app with Apple's real Xcode toolchain.
+# Code signing is disabled, so this needs NO Apple Developer account.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Compile on cloud macOS
+    runs-on: macos-15
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build (unsigned)
+        run: |
+          xcodebuild build \
+            -project PipelineDemo.xcodeproj \
+            -scheme PipelineDemo \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Verify the .app bundle exists
+        run: |
+          APP="build/DerivedData/Build/Products/Release-iphoneos/PipelineDemo.app"
+          test -d "$APP"
+          ls -la "$APP"
+          echo "HEADLESS BUILD OK: $APP"

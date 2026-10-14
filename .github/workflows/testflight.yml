@@ -1,0 +1,44 @@
+name: TestFlight (signed)
+
+# Manual-dispatch only. Builds a signed archive with Fastlane and uploads it
+# to TestFlight. Fails fast until the signing secrets exist (see README.md):
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_CONTENT  (App Store Connect API key)
+#   MATCH_GIT_URL, MATCH_PASSWORD, MATCH_GIT_BASIC_AUTHORIZATION (signing repo)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  beta:
+    name: Build + upload to TestFlight
+    runs-on: macos-15
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby + Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Build + upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          FASTLANE_SKIP_UPDATE_CHECK: "1"
+          MATCH_KEYCHAIN_NAME: "fastlane_tmp_keychain"
+          MATCH_KEYCHAIN_PASSWORD: ""
+        run: bundle exec fastlane beta
+
+      - name: Upload .ipa artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PipelineDemo-ipa
+          path: build/*.ipa
+          if-no-files-found: ignore
