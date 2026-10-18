@@ -1,0 +1,44 @@
+name: Build Go Green Triage
+
+# Compiles the Go Green Triage iOS app on a GitHub-hosted macOS runner.
+# Unsigned — no Apple Developer account needed for the compile proof.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "GoGreenTriage/**"
+      - "GoGreenTriage.xcodeproj/**"
+      - ".github/workflows/build-triage.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Compile Triage on cloud macOS
+    runs-on: macos-15
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build (unsigned)
+        run: |
+          xcodebuild build \
+            -project GoGreenTriage.xcodeproj \
+            -scheme GoGreenTriage \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/TriageDerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Verify the .app bundle exists
+        run: |
+          APP="build/TriageDerivedData/Build/Products/Release-iphoneos/GoGreenTriage.app"
+          test -d "$APP"
+          ls -la "$APP"
+          echo "HEADLESS TRIAGE BUILD OK: $APP"

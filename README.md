@@ -14,6 +14,27 @@ toolchain; **Fastlane** ships it. No local Mac, no manual Xcode steps.
 | Fastlane lanes: `build_ci`, `beta`, `release` | `fastlane/Fastfile` |
 | Bundle ID | `com.kevinflanagan.pipelinedemo` |
 
+## Go Green Triage (the first real app on this pipeline)
+
+`GoGreenTriage/` + `GoGreenTriage.xcodeproj` — the dead-simple approvals
+triage app from the GoGreenOS office-manager build. Bundle ID
+`com.kevinflanagan.gogreentriage`. Built by `.github/workflows/build-triage.yml`.
+
+- **Queue screen:** every draft waiting on Kevin, oldest first, with category
+  chips (Confirmation / Cleaner offer / Reminder / Customer text / Custom),
+  gate badges (Ready / Blocked / Duplicate / Needs info), and wait times.
+- **Decide fast:** swipe right to approve, swipe left to deny, or open the
+  draft for the full message + context and use the big Approve/Deny bar.
+  Approve/deny only — no editing, by design.
+- **Gate semantics match the platform:** `Blocked` items (e.g. outside
+  texting hours) can't be approved until the platform clears them;
+  `Duplicate` / `Needs info` show their note and remain Kevin's call.
+- **Data:** runs on clearly-labeled demo data (`MockApprovalService`)
+  shaped exactly like the live approvals queue. `APIApprovalService` is the
+  drop-in live client — wiring it needs Kevin's call on the app's
+  send-release authority + auth design, since an approval in this app
+  releases a real send.
+
 ## Pipeline states
 
 - **build_ci — WORKS TODAY, no Apple account needed.** Every push to `main`
